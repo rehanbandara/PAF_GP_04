@@ -11,17 +11,32 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 
-function getPriorityMeta(priority) {
-  switch (priority) {
-    case "high":
-      return { label: "High", color: "error" };
-    case "medium":
-      return { label: "Medium", color: "warning" };
-    case "low":
-      return { label: "Low", color: "success" };
-    default:
-      return { label: "Normal", color: "default" };
+function getScoreMeta(priorityScore) {
+  const score = Number(priorityScore);
+
+  if (!Number.isFinite(score)) {
+    return { label: "Not calculated", color: "default", variant: "outlined" };
   }
+
+  if (score >= 80)
+    return { label: `Score ${score} (High)`, color: "error", variant: "filled" };
+  if (score >= 50)
+    return { label: `Score ${score} (Medium)`, color: "warning", variant: "filled" };
+  return { label: `Score ${score} (Low)`, color: "success", variant: "filled" };
+}
+
+function getQuadrantMeta(matrixLabel) {
+  const label = matrixLabel || "Not calculated";
+
+  if (label === "Do now") return { label: "Do now", color: "error", variant: "outlined" };
+  if (label === "Schedule")
+    return { label: "Schedule", color: "success", variant: "outlined" };
+  if (label === "Delegate")
+    return { label: "Delegate", color: "warning", variant: "outlined" };
+  if (label === "Eliminate")
+    return { label: "Eliminate", color: "default", variant: "outlined" };
+
+  return { label: "Not calculated", color: "default", variant: "outlined" };
 }
 
 function getStatusAction(status) {
@@ -39,18 +54,17 @@ function getStatusAction(status) {
 
 /**
  * TaskCard
- * - Clean “real app” card UI:
- *   - Title + actions
- *   - Priority chip + status chip
- *   - Due date + overdue state
+ * - Clean card UI + actions
+ * - Shows matrix result + score (smart planner)
+ * - Shows overdue/due-today based on deadline
  * - Click card to edit (and explicit edit icon)
- * - Delete/status actions don't trigger edit (stopPropagation)
  */
 function TaskCard({
   task,
   id,
   title,
-  priority,
+  priorityScore,
+  matrixLabel,
   deadline,
   category,
   status,
@@ -58,7 +72,8 @@ function TaskCard({
   onStatusChange = () => { },
   onEdit = () => { },
 }) {
-  const priorityMeta = getPriorityMeta(priority);
+  const scoreMeta = getScoreMeta(priorityScore);
+  const quadrantMeta = getQuadrantMeta(matrixLabel);
   const statusAction = getStatusAction(status);
 
   // "YYYY-MM-DD" in local time (avoids UTC issues)
@@ -96,7 +111,8 @@ function TaskCard({
         border: "1px solid",
         borderColor: isOverdue ? "error.light" : "divider",
         bgcolor: isOverdue ? "rgba(211, 47, 47, 0.06)" : "background.paper",
-        transition: "transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease",
+        transition:
+          "transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease",
         "&:hover": {
           transform: "translateY(-1px)",
           boxShadow: 2,
@@ -159,9 +175,18 @@ function TaskCard({
       <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
         <Chip
           size="small"
-          label={`Priority: ${priorityMeta.label}`}
-          color={priorityMeta.color}
-          variant="outlined"
+          label={quadrantMeta.label}
+          color={quadrantMeta.color}
+          variant={quadrantMeta.variant}
+          sx={{ fontWeight: 900 }}
+        />
+
+        <Chip
+          size="small"
+          label={scoreMeta.label}
+          color={scoreMeta.color}
+          variant={scoreMeta.variant}
+          sx={{ fontWeight: 900 }}
         />
 
         <Chip size="small" label={statusChip.label} variant={statusChip.variant} />
@@ -172,14 +197,12 @@ function TaskCard({
           <Chip size="small" label="Due today" color="warning" variant="filled" />
         ) : null}
 
-        {category ? (
-          <Chip size="small" label={category} variant="outlined" />
-        ) : null}
+        {category ? <Chip size="small" label={category} variant="outlined" /> : null}
       </Stack>
 
       {/* Meta row */}
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-        Due: {deadline || "—"}
+        Deadline: {deadline || "—"}
       </Typography>
 
       {/* Status action */}

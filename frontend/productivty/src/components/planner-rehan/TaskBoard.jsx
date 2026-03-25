@@ -3,6 +3,7 @@ import { Box, Divider, Grid, Paper, Stack, Typography } from "@mui/material";
 
 import TaskCard from "./TaskCard";
 import useTaskStore from "../../store/taskStore";
+import { sortTasksIntelligently } from "./utils/priorityUtils";
 
 function KanbanColumn({
     title,
@@ -76,7 +77,8 @@ function KanbanColumn({
                                 task={task}
                                 id={task.id}
                                 title={task.title}
-                                priority={task.priority}
+                                priorityScore={task.priorityScore}
+                                matrixLabel={task.matrixLabel}
                                 deadline={task.deadline}
                                 category={task.category}
                                 status={task.status}
@@ -97,9 +99,10 @@ function TaskBoard({ onEdit, selectedDate }) {
 
     const formattedDate = selectedDate ? selectedDate.format("YYYY-MM-DD") : "";
 
+    // IMPORTANT: Daily view filters by plannedDate (calendar selects the plan day)
     const filteredTasks = useMemo(() => {
         if (!formattedDate) return [];
-        return tasks.filter((task) => task.deadline === formattedDate);
+        return tasks.filter((task) => task.plannedDate === formattedDate);
     }, [tasks, formattedDate]);
 
     const handleStatusChange = (id, newStatus) => {
@@ -108,14 +111,10 @@ function TaskBoard({ onEdit, selectedDate }) {
         updateTask({ ...task, status: newStatus });
     };
 
-    // Priority sorting (ToDo only): high -> medium -> low
-    const priorityOrder = { high: 3, medium: 2, low: 1 };
-
+    // Intelligent sorting (ToDo only): quadrant rank -> score -> deadline closeness
     const todoTasks = useMemo(() => {
         const list = filteredTasks.filter((t) => t.status === "todo");
-        return [...list].sort(
-            (a, b) => (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0)
-        );
+        return sortTasksIntelligently(list);
     }, [filteredTasks]);
 
     const inProgressTasks = useMemo(
@@ -148,7 +147,7 @@ function TaskBoard({ onEdit, selectedDate }) {
                     Task Board
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-                    Showing tasks due on <strong>{formattedDate || "—"}</strong>
+                    Showing tasks planned for <strong>{formattedDate || "—"}</strong>
                 </Typography>
             </Box>
 
@@ -166,7 +165,7 @@ function TaskBoard({ onEdit, selectedDate }) {
                     }}
                 >
                     <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
-                        No tasks due on this date
+                        No tasks planned for this date
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                         Select another date or add a task using the “Add Task” button.
@@ -177,7 +176,7 @@ function TaskBoard({ onEdit, selectedDate }) {
                     <Grid item xs={12} md={4}>
                         <KanbanColumn
                             title="To do"
-                            subtitle="Sorted by priority"
+                            subtitle="Sorted by matrix + score"
                             tasks={todoTasks}
                             emptyTitle="Nothing to start"
                             emptyHint="Add tasks and they will appear here."

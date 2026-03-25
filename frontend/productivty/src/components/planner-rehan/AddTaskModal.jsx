@@ -102,8 +102,10 @@ function AddTaskModal({ open, onClose, task, selectedDate }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
 
+  // Local date in "YYYY-MM-DD"
   const todayLocal = useMemo(() => dayjs().format("YYYY-MM-DD"), []);
 
+  // The planned date we default to when adding a new task
   const selectedPlannedDate = useMemo(() => {
     const d = selectedDate ? dayjs(selectedDate) : dayjs();
     return d.isValid() ? d.format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD");
@@ -201,30 +203,39 @@ function AddTaskModal({ open, onClose, task, selectedDate }) {
   const handleSubmit = () => {
     if (!validate()) return;
 
+    // Store numeric values to keep logic/sorting consistent
+    const importanceNum =
+      formData.importance === "" || formData.importance === null
+        ? ""
+        : Number(formData.importance);
+
+    const effortNum =
+      formData.effort === "" || formData.effort === null ? "" : Number(formData.effort);
+
     // Store calculated intelligence only when available.
     const intelligenceFields = analysis.isCalculated
       ? {
-        isImportant: analysis.isImportant,
-        isUrgent: analysis.isUrgent,
-        isFeasibleToday: analysis.isFeasibleToday,
-        matrixQuadrant: analysis.matrixQuadrant,
-        matrixLabel: analysis.matrixLabel,
-        matrixSortRank: analysis.matrixSortRank,
-        priorityScore: analysis.priorityScore,
-        recommendedAction: analysis.recommendedAction,
-        reason: analysis.reason,
-      }
+          isImportant: analysis.isImportant,
+          isUrgent: analysis.isUrgent,
+          isFeasibleToday: analysis.isFeasibleToday,
+          matrixQuadrant: analysis.matrixQuadrant,
+          matrixLabel: analysis.matrixLabel,
+          matrixSortRank: analysis.matrixSortRank,
+          priorityScore: analysis.priorityScore,
+          recommendedAction: analysis.recommendedAction,
+          reason: analysis.reason,
+        }
       : {
-        isImportant: null,
-        isUrgent: null,
-        isFeasibleToday: null,
-        matrixQuadrant: null,
-        matrixLabel: "Not calculated",
-        matrixSortRank: 999,
-        priorityScore: null,
-        recommendedAction: "Add importance, effort, and deadline to calculate.",
-        reason: "Missing one or more fields: importance, effort, deadline.",
-      };
+          isImportant: null,
+          isUrgent: null,
+          isFeasibleToday: null,
+          matrixQuadrant: null,
+          matrixLabel: "Not calculated",
+          matrixSortRank: 999,
+          priorityScore: null,
+          recommendedAction: "Add importance, effort, and deadline to calculate.",
+          reason: "Missing one or more fields: importance, effort, deadline.",
+        };
 
     if (isEditMode) {
       updateTask({
@@ -234,8 +245,8 @@ function AddTaskModal({ open, onClose, task, selectedDate }) {
         deadline: formData.deadline || "",
         category: formData.category.trim(),
         notes: formData.notes,
-        importance: formData.importance,
-        effort: formData.effort,
+        importance: importanceNum,
+        effort: effortNum,
         ...intelligenceFields,
       });
     } else {
@@ -246,8 +257,8 @@ function AddTaskModal({ open, onClose, task, selectedDate }) {
         deadline: formData.deadline || "",
         category: formData.category.trim(),
         notes: formData.notes,
-        importance: formData.importance,
-        effort: formData.effort,
+        importance: importanceNum,
+        effort: effortNum,
         status: "todo",
         ...intelligenceFields,
       });

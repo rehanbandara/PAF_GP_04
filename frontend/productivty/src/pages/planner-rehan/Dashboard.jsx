@@ -75,7 +75,7 @@ function Dashboard() {
               </Typography>
 
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                {selectedDateLabel} • Manage tasks by deadline
+                {selectedDateLabel} • Plan your tasks for the day
               </Typography>
             </Box>
 
@@ -110,6 +110,7 @@ function Dashboard() {
           open={openModal}
           onClose={handleCloseModal}
           task={selectedTask}
+          selectedDate={selectedDate}
         />
       </Box>
     </Box>

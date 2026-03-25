@@ -1,39 +1,64 @@
 import { create } from "zustand";
 
-/**
- * Task model (frontend-ready and backend-friendly)
- * ------------------------------------------------
- * id: string
- * title: string (required)
- * status: "todo" | "in-progress" | "done"
- * plannedDate: "YYYY-MM-DD" (the day user plans to work on it)  ✅ used by Calendar/Board
- * deadline: "YYYY-MM-DD" | "" (optional, used for overdue and due-today)
- * priority: "high" | "medium" | "low" (computed)
- * category: string
- * notes: string
- * importance: number | ""  (optional)
- * effort: number | ""      (optional, hours)
- */
+const STORAGE_KEY = "planner_rehan_tasks_v1";
 
+function safeLoad() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+function safeSave(tasks) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    } catch {
+        // ignore write errors (private mode etc.)
+    }
+}
+
+/**
+ * Task store (demo-ready)
+ * ----------------------
+ * - Persists tasks to localStorage so refresh doesn't wipe work.
+ * - Later you can replace this with React Query + backend persistence.
+ */
 const useTaskStore = create((set) => ({
-    tasks: [],
+    tasks: safeLoad(),
 
     addTask: (task) =>
-        set((state) => ({
-            tasks: [task, ...state.tasks], // newest first (more real-world)
-        })),
+        set((state) => {
+            const next = [task, ...state.tasks];
+            safeSave(next);
+            return { tasks: next };
+        }),
 
     deleteTask: (id) =>
-        set((state) => ({
-            tasks: state.tasks.filter((task) => task.id !== id),
-        })),
+        set((state) => {
+            const next = state.tasks.filter((task) => task.id !== id);
+            safeSave(next);
+            return { tasks: next };
+        }),
 
     updateTask: (updatedTask) =>
-        set((state) => ({
-            tasks: state.tasks.map((task) =>
+        set((state) => {
+            const next = state.tasks.map((task) =>
                 task.id === updatedTask.id ? updatedTask : task
-            ),
-        })),
+            );
+            safeSave(next);
+            return { tasks: next };
+        }),
+
+    // Helpful for testing/demo resets
+    clearAll: () =>
+        set(() => {
+            safeSave([]);
+            return { tasks: [] };
+        }),
 }));
 
 export default useTaskStore;

@@ -5,10 +5,9 @@ import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import Dashboard from "./pages/planner-rehan/Dashboard";
 
 /**
- * IMPORTANT:
- * Do NOT wrap <Routes> with <BrowserRouter> here if your app already
- * wraps <App /> with <BrowserRouter> in src/index.js.
- * Otherwise you'll get: "You cannot render a <Router> inside another <Router>"
+ * App.js
+ * ------
+ * BrowserRouter is mounted in src/index.js.
  */
 
 const theme = createTheme({
@@ -20,7 +19,7 @@ const theme = createTheme({
   },
   shape: { borderRadius: 14 },
   typography: {
-    fontFamily: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial'].join(
+    fontFamily: ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Arial"].join(
       ","
     ),
     h5: { fontWeight: 900 },
@@ -65,8 +64,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/planner" replace />} />
         <Route path="/planner" element={<Dashboard />} />
-
-        {/* fallback */}
         <Route path="*" element={<Navigate to="/planner" replace />} />
       </Routes>
     </ThemeProvider>

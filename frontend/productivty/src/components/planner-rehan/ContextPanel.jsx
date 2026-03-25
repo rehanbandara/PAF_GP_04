@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import { Box, Button, Divider, Paper, Stack, Typography } from "@mui/material";
 import TodayOutlinedIcon from "@mui/icons-material/TodayOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-
 import dayjs from "dayjs";
 
 // MUI X Date Picker
@@ -21,9 +20,11 @@ function ContextPanel({ onOpenModal, selectedDate, setSelectedDate }) {
     const greeting = useMemo(() => getGreeting(new Date()), []);
 
     const today = dayjs();
-    const isTodaySelected = Boolean(selectedDate) && selectedDate.isSame(today, "day");
+    const safeSelectedDate = selectedDate || today;
 
-    const selectedLabel = selectedDate ? selectedDate.format("dddd, MMM D") : "—";
+    const isTodaySelected = Boolean(safeSelectedDate) && safeSelectedDate.isSame(today, "day");
+
+    const selectedLabel = safeSelectedDate ? safeSelectedDate.format("dddd, MMM D") : "—";
     const todayLabel = today.format("dddd, MMM D");
 
     return (
@@ -57,7 +58,7 @@ function ContextPanel({ onOpenModal, selectedDate, setSelectedDate }) {
 
                     <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
                         <Typography variant="body2" color="text.secondary">
-                            Selected
+                            Selected (Plan day)
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 800 }}>
                             {selectedLabel}
@@ -99,16 +100,17 @@ function ContextPanel({ onOpenModal, selectedDate, setSelectedDate }) {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                         <DatePicker
-                            label="Select date"
-                            value={selectedDate}
-                            onChange={(newValue) => setSelectedDate(newValue)}
+                            label="Select plan date"
+                            value={safeSelectedDate}
+                            onChange={(newValue) => setSelectedDate(newValue || today)}
                             slotProps={{
                                 textField: { fullWidth: true, size: "small" },
                             }}
                         />
 
                         <Typography variant="caption" color="text.secondary">
-                            Tip: tasks are filtered by their deadline date.
+                            Tip: Task Board shows tasks planned for the selected date. Deadlines are used for
+                            overdue warnings and scoring.
                         </Typography>
                     </Box>
                 </LocalizationProvider>
@@ -143,10 +145,10 @@ function ContextPanel({ onOpenModal, selectedDate, setSelectedDate }) {
                     <Button
                         variant="outlined"
                         fullWidth
-                        onClick={() => setSelectedDate(null)}
+                        onClick={() => setSelectedDate(today)}
                         sx={{ borderRadius: 2 }}
                     >
-                        Clear selected date
+                        Reset to today
                     </Button>
                 </Stack>
             </Paper>

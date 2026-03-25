@@ -14,16 +14,11 @@ import lombok.Setter;
 /**
  * Task Entity
  * ----------
- * What is an Entity?
- * - In Spring Data JPA, an "entity" is a normal Java class that represents a row in a database table.
- * - Each object of this class becomes one record (row) in the table.
+ * Stores both:
+ * - user inputs (plannedDate, deadline, importance, effort, etc.)
+ * - computed intelligence fields (matrix + score)
  *
- * How it maps to the database:
- * - This class maps to a table called "tasks".
- * - Each field maps to a column in that table.
- *
- * NOTE:
- * - We are keeping it simple (no relationships like User, SubTasks, etc. yet).
+ * Dates are stored as "YYYY-MM-DD" strings for simplicity (frontend-friendly).
  */
 @Entity
 @Table(name = "tasks")
@@ -33,56 +28,52 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Task {
 
-    /**
-     * @Id
-     * - Marks this field as the primary key column in the database table.
-     *
-     * @GeneratedValue(strategy = GenerationType.IDENTITY)
-     * - Tells the database to auto-generate the id value.
-     * - With MySQL, this usually means AUTO_INCREMENT.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * Required field in your app (title must be provided).
-     * For now we keep it as a simple String column.
-     */
+    // Basics
     private String title;
 
     /**
-     * Deadline for the task.
-     * Recommended best practice is LocalDate, but String also works.
-     * We'll use LocalDate later if you want; keeping it simple now.
+     * The day user plans to do the task (daily view uses this).
+     * Example: "2026-03-25"
+     */
+    private String plannedDate;
+
+    /**
+     * Real due date (used for overdue + urgency).
+     * Example: "2026-03-30"
      */
     private String deadline;
 
     /**
-     * Priority as a string:
-     * "high", "medium", "low"
+     * Status: "todo", "in-progress", "done"
      */
-    private String priority;
+    private String status;
 
-    /**
-     * Estimated effort (example: hours).
-     */
-    private Integer effort;
-
-    /**
-     * Category / tag for grouping tasks.
-     * Example: "#study"
-     */
     private String category;
-
-    /**
-     * Extra notes for the task.
-     */
     private String notes;
 
     /**
-     * Status of the task:
-     * "todo", "in-progress", "done"
+     * Inputs for analysis:
+     * - importance: 1..10 (1 = most important)
+     * - effort: hours (can be decimal)
      */
-    private String status;
+    private Integer importance;
+    private Double effort;
+
+    // --- Intelligence fields (saved from frontend analysis) ---
+    private Boolean isImportant;
+    private Boolean isUrgent;
+    private Boolean isFeasibleToday;
+
+    private String matrixQuadrant;     // Q1..Q4
+    private String matrixLabel;        // Do now / Schedule / Delegate / Eliminate
+    private Integer matrixSortRank;    // 1..4 (Q1 best) or 999
+
+    private Integer priorityScore;     // 0..100
+
+    private String recommendedAction;
+    private String reason;
 }
