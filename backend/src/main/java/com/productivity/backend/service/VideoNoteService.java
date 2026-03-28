@@ -113,8 +113,13 @@ public class VideoNoteService {
 
     @Transactional
     public void remove(Long noteId) {
-        noteService.getOwnedNote(noteId);
-        videoNoteRepository.deleteByNoteId(noteId);
+        Note note = noteService.getOwnedNote(noteId);
+        VideoNote videoNote = videoNoteRepository.findByNoteId(noteId)
+                .orElseThrow(() -> new ResourceNotFoundException("No video attached to this note"));
+
+        // Keep the in-memory one-to-one association in sync before removing the child entity.
+        note.setVideoNote(null);
+        videoNoteRepository.delete(videoNote);
     }
 
     /**
