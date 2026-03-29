@@ -103,7 +103,18 @@ const Goals = () => {
     const inProgress = goals.filter(goal => goal.status === 'in-progress').length;
     const notStarted = goals.filter(goal => goal.status === 'not-started').length;
     
-    setStats({ total, completed, inProgress, notStarted });
+    // Calculate overall progress based on individual units completed
+    const totalProgressUnits = goals.reduce((sum, goal) => sum + goal.progress, 0);
+    const maxPossibleProgress = total * 100; // Each goal is worth 100 progress units
+    const overallProgressPercentage = maxPossibleProgress > 0 ? Math.round((totalProgressUnits / maxPossibleProgress) * 100) : 0;
+    
+    setStats({ 
+      total, 
+      completed, 
+      inProgress, 
+      notStarted,
+      overallProgressPercentage // Add overall progress calculation
+    });
   }, [goals]);
 
   useEffect(() => {
@@ -157,21 +168,30 @@ const Goals = () => {
     setGoals(goals.map(goal => {
       if (goal.id === goalId) {
         let newProgress = goal.progress;
+        
+        // Handle different status changes
         if (newStatus === 'completed') {
           newProgress = 100;
         } else if (newStatus === 'in-progress' && goal.progress === 0) {
           newProgress = 25;
+        } else if (newStatus === 'increment') {
+          // Increment progress by 25% for manual progress marking
+          newProgress = Math.min(goal.progress + 25, 100);
         }
         
         return {
           ...goal,
-          status: newStatus,
+          status: newProgress >= 100 ? 'completed' : (newProgress > 0 && newProgress < 100) ? 'in-progress' : newStatus,
           progress: newProgress,
-          completed: newStatus === 'completed'
+          completed: newProgress >= 100
         };
       }
       return goal;
     }));
+  };
+
+  const incrementProgress = (goalId) => {
+    handleStatusChange(goalId, 'increment');
   };
 
   const getFilteredGoals = () => {
@@ -248,6 +268,19 @@ const Goals = () => {
               <CardContent>
                 <Typography variant="h4" color="info.main">{stats.notStarted}</Typography>
                 <Typography variant="body2" color="textSecondary">Not Started</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h4" color="primary.main">{stats.overallProgressPercentage}%</Typography>
+                <Typography variant="body2" color="textSecondary">Overall Progress</Typography>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={stats.overallProgressPercentage} 
+                  sx={{ mt: 1 }}
+                />
               </CardContent>
             </Card>
           </Grid>
@@ -349,6 +382,44 @@ const Goals = () => {
                         value={goal.progress} 
                         sx={{ mb: 1 }}
                       />
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => incrementProgress(goal.id)}
+                          disabled={goal.status === 'completed'}
+                          sx={{ minWidth: 80 }}
+                        >
+                          +25%
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => incrementProgress(goal.id)}
+                          disabled={goal.status === 'completed'}
+                          sx={{ minWidth: 80 }}
+                        >
+                          +50%
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => incrementProgress(goal.id)}
+                          disabled={goal.status === 'completed'}
+                          sx={{ minWidth: 80 }}
+                        >
+                          +75%
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => incrementProgress(goal.id)}
+                          disabled={goal.status === 'completed'}
+                          sx={{ minWidth: 80 }}
+                        >
+                          +100%
+                        </Button>
+                      </Box>
                     </Box>
 
                     <Box sx={{ display: 'flex', gap: 1 }}>

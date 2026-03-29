@@ -25,15 +25,11 @@ import {
   Timer as FocusIcon,
   SelfImprovement as WellnessIcon,
   NotificationsActive as NotificationIcon,
-  Palette as AppearanceIcon,
   Work as WorkIcon,
   FreeBreakfast as BreakIcon,
   AccessTime as LongBreakIcon,
   Visibility as EyeIcon,
   Settings as SettingsIcon,
-  ColorLens as ColorLensIcon,
-  Preview as PreviewIcon,
-  Info as InfoIcon,
   PlayArrow as TestIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
@@ -70,12 +66,6 @@ const Settings = () => {
     volume: 70
   });
 
-  // Appearance Settings
-  const [appearanceSettings, setAppearanceSettings] = useState({
-    theme: 'light',
-    primaryColor: '#2c3e50'
-  });
-
   const [notification, setNotification] = useState({ open: false, message: '', type: 'success' });
 
   // Load settings from localStorage on mount
@@ -83,7 +73,6 @@ const Settings = () => {
     const savedFocusSettings = localStorage.getItem('focusSettings');
     const savedWellnessSettings = localStorage.getItem('wellnessSettings');
     const savedNotificationSettings = localStorage.getItem('notificationSettings');
-    const savedAppearanceSettings = localStorage.getItem('appearanceSettings');
 
     if (savedFocusSettings) {
       setFocusSettings(JSON.parse(savedFocusSettings));
@@ -93,9 +82,6 @@ const Settings = () => {
     }
     if (savedNotificationSettings) {
       setNotificationSettings(JSON.parse(savedNotificationSettings));
-    }
-    if (savedAppearanceSettings) {
-      setAppearanceSettings(JSON.parse(savedAppearanceSettings));
     }
   }, []);
 
@@ -112,15 +98,10 @@ const Settings = () => {
     localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings));
   }, [notificationSettings]);
 
-  useEffect(() => {
-    localStorage.setItem('appearanceSettings', JSON.stringify(appearanceSettings));
-  }, [appearanceSettings]);
-
   const navigationItems = [
     { id: 'focus', label: 'Focus Settings', icon: <FocusIcon />, description: 'Pomodoro timer configuration' },
     { id: 'wellness', label: 'Wellness Settings', icon: <WellnessIcon />, description: 'Health and break reminders' },
-    { id: 'notifications', label: 'Notifications', icon: <NotificationIcon />, description: 'Alert preferences' },
-    { id: 'appearance', label: 'Appearance', icon: <AppearanceIcon />, description: 'Theme and colors' }
+    { id: 'notifications', label: 'Notifications', icon: <NotificationIcon />, description: 'Alert preferences' }
   ];
 
   const handleFocusSettingChange = (field, value) => {
@@ -139,13 +120,6 @@ const Settings = () => {
 
   const handleNotificationSettingChange = (field, value) => {
     setNotificationSettings(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleAppearanceSettingChange = (field, value) => {
-    setAppearanceSettings(prev => ({
       ...prev,
       [field]: value
     }));
@@ -177,10 +151,6 @@ const Settings = () => {
       soundEnabled: true,
       notificationType: 'both',
       volume: 70
-    });
-    setAppearanceSettings({
-      theme: 'light',
-      primaryColor: '#2c3e50'
     });
     showNotification('All settings reset to defaults!');
   };
@@ -383,7 +353,6 @@ const Settings = () => {
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
-              <InfoIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
               Wellness Guidelines
             </Typography>
             <Alert severity="info" sx={{ mb: 2 }}>
@@ -531,92 +500,6 @@ const Settings = () => {
     </Grid>
   );
 
-  const renderAppearanceSettings = () => (
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={6}>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              <AppearanceIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-              Theme
-            </Typography>
-            <FormControl fullWidth>
-              <InputLabel>Theme</InputLabel>
-              <Select
-                value={appearanceSettings.theme}
-                onChange={(e) => handleAppearanceSettingChange('theme', e.target.value)}
-              >
-                <MenuItem value="light">Light</MenuItem>
-                <MenuItem value="dark">Dark</MenuItem>
-                <MenuItem value="system">System</MenuItem>
-              </Select>
-            </FormControl>
-            <Alert severity="info" sx={{ mt: 2 }}>
-              <Typography variant="body2">
-                Theme changes will apply to the entire application.
-              </Typography>
-            </Alert>
-          </CardContent>
-        </Card>
-      </Grid>
-
-      <Grid item xs={12} md={6}>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              <ColorLensIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-              Primary Color
-            </Typography>
-            <TextField
-              fullWidth
-              label="Primary Color"
-              type="color"
-              value={appearanceSettings.primaryColor}
-              onChange={(e) => handleAppearanceSettingChange('primaryColor', e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              {['#2c3e50', '#3498db', '#e74c3c', '#27ae60', '#f39c12', '#9b59b6'].map(color => (
-                <Chip
-                  key={color}
-                  label={color}
-                  sx={{ 
-                    backgroundColor: color, 
-                    color: 'white',
-                    '&:hover': { backgroundColor: color }
-                  }}
-                  onClick={() => handleAppearanceSettingChange('primaryColor', color)}
-                />
-              ))}
-            </Box>
-          </CardContent>
-        </Card>
-      </Grid>
-
-      <Grid item xs={12}>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              <PreviewIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-              Preview
-            </Typography>
-            <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-              <Typography variant="h6" sx={{ color: appearanceSettings.primaryColor, mb: 1 }}>
-                Sample Heading
-              </Typography>
-              <Typography variant="body1" paragraph>
-                This is how your selected theme and colors will appear throughout the application.
-              </Typography>
-              <Button variant="contained" sx={{ backgroundColor: appearanceSettings.primaryColor }}>
-                Sample Button
-              </Button>
-            </Box>
-          </CardContent>
-        </Card>
-      </Grid>
-    </Grid>
-  );
-
   const renderContent = () => {
     switch (activeSection) {
       case 'focus':
@@ -625,8 +508,6 @@ const Settings = () => {
         return renderWellnessSettings();
       case 'notifications':
         return renderNotificationSettings();
-      case 'appearance':
-        return renderAppearanceSettings();
       default:
         return renderFocusSettings();
     }
@@ -709,13 +590,8 @@ const Settings = () => {
         open={notification.open}
         autoHideDuration={3000}
         onClose={() => setNotification({ ...notification, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert 
-          onClose={() => setNotification({ ...notification, open: false })}
-          severity={notification.type}
-          sx={{ width: '100%' }}
-        >
+        <Alert severity={notification.type} onClose={() => setNotification({ ...notification, open: false })}>
           {notification.message}
         </Alert>
       </Snackbar>

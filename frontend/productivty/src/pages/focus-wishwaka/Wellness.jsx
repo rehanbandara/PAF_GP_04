@@ -203,9 +203,9 @@ const Wellness = () => {
 
   const getAlertTitle = (type) => {
     switch (type) {
-      case 'eyeRest': return '👁️ Eye Rest Alert';
-      case 'posture': return '🧘 Posture Check';
-      case 'break': return '☕ Break Time';
+      case 'eyeRest': return 'Eye Rest Alert';
+      case 'posture': return 'Posture Check';
+      case 'break': return 'Break Time';
       default: return 'Wellness Reminder';
     }
   };

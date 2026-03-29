@@ -5,7 +5,11 @@ import {
   IconButton
 } from '@mui/material';
 import {
-  Close as CloseIcon
+  Close as CloseIcon,
+  FreeBreakfast as BreakIcon,
+  Visibility as EyeRestIcon,
+  SelfImprovement as PostureIcon,
+  NotificationsActive as WellnessIcon
 } from '@mui/icons-material';
 
 const WellnessAlert = ({ type, message, onClose, visible }) => {
@@ -16,28 +20,28 @@ const WellnessAlert = ({ type, message, onClose, visible }) => {
       case 'break':
         return {
           bgcolor: '#ff9800',
-          icon: '⏰',
+          icon: <BreakIcon />,
           title: 'Break Time!',
           color: 'white'
         };
       case 'eyeRest':
         return {
           bgcolor: '#4caf50',
-          icon: '👁️',
+          icon: <EyeRestIcon />,
           title: 'Eye Rest Alert',
           color: 'white'
         };
       case 'posture':
         return {
           bgcolor: '#2196f3',
-          icon: '🧘',
+          icon: <PostureIcon />,
           title: 'Posture Check',
           color: 'white'
         };
       default:
         return {
           bgcolor: '#757575',
-          icon: '📢',
+          icon: <WellnessIcon />,
           title: 'Wellness Reminder',
           color: 'white'
         };
@@ -55,7 +59,10 @@ const WellnessAlert = ({ type, message, onClose, visible }) => {
       >
         <CloseIcon />
       </IconButton>
-      <Typography variant="h6">{config.icon} {config.title}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {config.icon}
+        <Typography variant="h6">{config.title}</Typography>
+      </Box>
       <Typography>{message}</Typography>
     </Paper>
   );

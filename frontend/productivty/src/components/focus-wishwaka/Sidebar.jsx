@@ -28,7 +28,7 @@ const Sidebar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate = useNavigate();
+  const navigate = useNavigate();   
   const location = useLocation();
 
   const menuItems = [
