@@ -537,7 +537,7 @@ const handleSubmit = async () => {
                   "& .MuiAlert-message": { color: theme.custom.colors.textPrimary },
                 })}
               >
-                Please check the highlighted fields and try again.
+                Please fill the highlighted fields and try again.
               </Alert>
             ) : null}
 
@@ -811,7 +811,7 @@ const handleSubmit = async () => {
             <SectionTitle
               icon={<InsightsOutlinedIcon fontSize="small" />}
               title="Priority inputs (optional)"
-              subtitle=""
+              subtitle="1 = Highest priority  |  10 = Lowest priority "
             />
 
             <Stack direction={{ xs: "column", md: "row" }} spacing={UI.layout.fieldGap}>
