@@ -12,13 +12,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Task Entity
- * ----------
- * Stores both:
- * - user inputs (plannedDate, deadline, importance, effort, etc.)
- * - computed intelligence fields (matrix + score)
+ * Task Entity (Planner)
  *
- * Dates are stored as "YYYY-MM-DD" strings for simplicity (frontend-friendly).
+ * Stores:
+ * - Required: title, plannedDate
+ * - Optional schedule: startTime, endTime
+ * - Optional deadline: deadlineDate, deadlineTime
+ * - Meta: priority, effort, category, notes, status
+ *
+ * NOTE:
+ * - We keep dates/times as Strings for now to match your frontend ("YYYY-MM-DD", "HH:mm").
+ * - Later you can migrate to LocalDate/LocalTime.
  */
 @Entity
 @Table(name = "tasks")
@@ -32,48 +36,61 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Basics
+    // Required
     private String title;
 
     /**
-     * The day user plans to do the task (daily view uses this).
-     * Example: "2026-03-25"
+     * Planned date user intends to do the task ("YYYY-MM-DD").
+     * This is what your TaskBoard filters by.
      */
     private String plannedDate;
 
     /**
-     * Real due date (used for overdue + urgency).
-     * Example: "2026-03-30"
+     * Optional time slot ("HH:mm").
+     * If both startTime and endTime are present => "Scheduled" task.
+     */
+    private String startTime;
+    private String endTime;
+
+    /**
+     * Optional deadline date/time.
+     * deadlineDate: "YYYY-MM-DD"
+     * deadlineTime: "HH:mm"
+     */
+    private String deadlineDate;
+    private String deadlineTime;
+
+    /**
+     * Legacy field (optional).
+     * Keep it for backward compatibility with your current frontend payload (`deadline`).
+     * You can remove this later once frontend fully uses deadlineDate/deadlineTime.
      */
     private String deadline;
+
+    /**
+     * Priority as a string: "high", "medium", "low", "normal"
+     */
+    private String priority;
+
+    /**
+     * Estimated effort (hours).
+     * Your frontend uses numeric input; this should be Integer.
+     */
+    private Integer effort;
+
+    /**
+     * Importance (1-10) used by your matrix logic.
+     * (Your frontend has `importance` already.)
+     */
+    private Integer importance;
+
+    private String category;
+    private String notes;
 
     /**
      * Status: "todo", "in-progress", "done"
      */
     private String status;
 
-    private String category;
-    private String notes;
-
-    /**
-     * Inputs for analysis:
-     * - importance: 1..10 (1 = most important)
-     * - effort: hours (can be decimal)
-     */
-    private Integer importance;
-    private Double effort;
-
-    // --- Intelligence fields (saved from frontend analysis) ---
-    private Boolean isImportant;
-    private Boolean isUrgent;
-    private Boolean isFeasibleToday;
-
-    private String matrixQuadrant;     // Q1..Q4
-    private String matrixLabel;        // Do now / Schedule / Delegate / Eliminate
-    private Integer matrixSortRank;    // 1..4 (Q1 best) or 999
-
-    private Integer priorityScore;     // 0..100
-
-    private String recommendedAction;
-    private String reason;
+    // Optional: if you later want to persist your analysis fields, add them here too.
 }

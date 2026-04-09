@@ -1,64 +1,76 @@
 import { create } from "zustand";
+import {
+  fetchTasks,
+  createTask as apiCreateTask,
+  updateTask as apiUpdateTask,
+  deleteTask as apiDeleteTask,
+} from "../api/taskApi";
 
-const STORAGE_KEY = "planner_rehan_tasks_v1";
+const useTaskStore = create((set, get) => ({
+  tasks: [],
+  loading: false,
+  error: null,
 
-function safeLoad() {
+  clearError: () => set({ error: null }),
+
+  loadTasks: async () => {
+    set({ loading: true, error: null });
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-    } catch {
-        return [];
+      const tasks = await fetchTasks();
+      set({ tasks: Array.isArray(tasks) ? tasks : [], loading: false });
+    } catch (err) {
+      set({ loading: false, error: err?.message || "Failed to load tasks" });
     }
-}
+  },
 
-function safeSave(tasks) {
+  addTask: async (taskPayload) => {
+    set({ loading: true, error: null });
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-    } catch {
-        // ignore write errors (private mode etc.)
+      // Backend returns saved task with numeric id (Long)
+      const saved = await apiCreateTask(taskPayload);
+      set((state) => ({
+        tasks: [saved, ...state.tasks],
+        loading: false,
+      }));
+      return saved;
+    } catch (err) {
+      set({ loading: false, error: err?.message || "Failed to create task" });
+      throw err;
     }
-}
+  },
 
-/**
- * Task store (demo-ready)
- * ----------------------
- * - Persists tasks to localStorage so refresh doesn't wipe work.
- * - Later you can replace this with React Query + backend persistence.
- */
-const useTaskStore = create((set) => ({
-    tasks: safeLoad(),
+  updateTask: async (task) => {
+    if (!task?.id) throw new Error("updateTask requires task.id");
 
-    addTask: (task) =>
-        set((state) => {
-            const next = [task, ...state.tasks];
-            safeSave(next);
-            return { tasks: next };
-        }),
+    set({ loading: true, error: null });
+    try {
+      const saved = await apiUpdateTask(task);
+      set((state) => ({
+        tasks: state.tasks.map((t) => (t.id === saved.id ? saved : t)),
+        loading: false,
+      }));
+      return saved;
+    } catch (err) {
+      set({ loading: false, error: err?.message || "Failed to update task" });
+      throw err;
+    }
+  },
 
-    deleteTask: (id) =>
-        set((state) => {
-            const next = state.tasks.filter((task) => task.id !== id);
-            safeSave(next);
-            return { tasks: next };
-        }),
+  deleteTask: async (id) => {
+    if (id === null || id === undefined) return;
 
-    updateTask: (updatedTask) =>
-        set((state) => {
-            const next = state.tasks.map((task) =>
-                task.id === updatedTask.id ? updatedTask : task
-            );
-            safeSave(next);
-            return { tasks: next };
-        }),
-
-    // Helpful for testing/demo resets
-    clearAll: () =>
-        set(() => {
-            safeSave([]);
-            return { tasks: [] };
-        }),
+    set({ loading: true, error: null });
+    try {
+      await apiDeleteTask(id);
+      set((state) => ({
+        tasks: state.tasks.filter((t) => t.id !== id),
+        loading: false,
+      }));
+    } catch (err) {
+      set({ loading: false, error: err?.message || "Failed to delete task" });
+      throw err;
+    }
+  },
 }));
 
 export default useTaskStore;

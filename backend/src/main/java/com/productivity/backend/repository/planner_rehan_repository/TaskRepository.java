@@ -10,9 +10,9 @@ import com.productivity.backend.entity.planner_rehan_entity.Task;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    // Old: deadline filter (keep if you want)
-    List<Task> findByDeadline(String deadline);
+    // Preferred: query by deadlineDate (YYYY-MM-DD)
+    List<Task> findByDeadlineDate(String deadlineDate);
 
-    // New: plannedDate filter (daily view)
-    List<Task> findByPlannedDate(String plannedDate);
+    // Optional (keep only if you still want legacy support):
+    // List<Task> findByDeadline(String deadline);
 }

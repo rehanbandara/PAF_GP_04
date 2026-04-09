@@ -1,30 +1,51 @@
-import React, { useState } from "react";
-import { Box, Button, Grid, Paper, Stack, Typography } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import React, { useEffect, useState } from "react";
+import { Box } from "@mui/material";
 import dayjs from "dayjs";
 
 import AddTaskModal from "../../components/planner-rehan/AddTaskModal";
 import ContextPanel from "../../components/planner-rehan/ContextPanel";
 import TaskBoard from "../../components/planner-rehan/TaskBoard";
+import Main_NavBar from "../../components/common/Main_NavBar";
+
+import useTaskStore from "../../store/taskStore";
+
+const UI = {
+  layout: {
+    pageMinHeight: "100vh",
+    pagePx: { xs: 2, md: 3 },
+    pagePy: { xs: 2, md: 3 },
+    containerMaxWidth: 1200,
+
+    gap: 2,
+
+    rightPanelWidth: 360,
+    rightPanelHeight: "calc(100vh - 140px)",
+  },
+};
 
 function Dashboard() {
-  // Shared selected date for filtering (Dayjs object)
   const [selectedDate, setSelectedDate] = useState(dayjs());
-
-  // Modal open/close state
   const [openModal, setOpenModal] = useState(false);
-
-  // If null => Add Mode. If set => Edit Mode
   const [selectedTask, setSelectedTask] = useState(null);
 
+  const loadTasks = useTaskStore((s) => s.loadTasks);
+  const loading = useTaskStore((s) => s.loading);
+  const error = useTaskStore((s) => s.error);
+  const clearError = useTaskStore((s) => s.clearError);
+
+  useEffect(() => {
+    loadTasks();
+
+  }, []);
+
   const handleOpenAddModal = () => {
-    setSelectedTask(null); // ensure Add Mode
+    setSelectedTask(null);
     setOpenModal(true);
   };
 
   const handleCloseModal = () => {
     setOpenModal(false);
-    setSelectedTask(null); // cleanup after closing
+    setSelectedTask(null);
   };
 
   const handleEditTask = (task) => {
@@ -32,80 +53,72 @@ function Dashboard() {
     setOpenModal(true);
   };
 
-  const selectedDateLabel = selectedDate
-    ? selectedDate.format("dddd, MMM D")
-    : "No date selected";
-
   return (
     <Box
-      sx={{
-        minHeight: "100vh",
-        bgcolor: "background.default",
-        px: { xs: 2, md: 3 },
-        py: { xs: 2, md: 3 },
-      }}
+      sx={(theme) => ({
+        minHeight: UI.layout.pageMinHeight,
+        bgcolor: theme.custom?.colors?.appBg || "background.default",
+        px: UI.layout.pagePx,
+        py: UI.layout.pagePy,
+        color: theme.custom?.colors?.textPrimary || "text.primary",
+      })}
     >
-      {/* Page container (keeps a real-world max width) */}
-      <Box sx={{ maxWidth: 1280, mx: "auto" }}>
-        {/* Header */}
-        <Paper
-          elevation={0}
+      <Box sx={{ maxWidth: UI.layout.containerMaxWidth, mx: "auto" }}>
+        <Main_NavBar brand="Productivity" />
+
+        {/* Click to dismiss error */}
+        {error ? (
+          <Box
+            role="alert"
+            onClick={clearError}
+            sx={(theme) => ({
+              mt: 2,
+              mb: 1,
+              p: 1.25,
+              borderRadius: 2,
+              border: "1px solid",
+              borderColor: theme.custom?.colors?.danger || "error.main",
+              bgcolor:
+                theme.palette.mode === "dark"
+                  ? "rgba(217,30,54,0.10)"
+                  : "rgba(217,30,54,0.08)",
+              cursor: "pointer",
+            })}
+            title="Click to dismiss"
+          >
+            {error}
+          </Box>
+        ) : null}
+
+        <Box
           sx={{
-            p: { xs: 2, md: 2.5 },
-            mb: 2,
-            borderRadius: 2,
-            border: "1px solid",
-            borderColor: "divider",
-            bgcolor: "background.paper",
+            display: "flex",
+            gap: UI.layout.gap,
+            alignItems: "flex-start",
+            flexWrap: { xs: "wrap", md: "nowrap" },
+            opacity: loading ? 0.85 : 1,
           }}
         >
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            alignItems={{ xs: "flex-start", sm: "center" }}
-            justifyContent="space-between"
-          >
-            <Box>
-              <Typography
-                variant="h5"
-                component="h1"
-                sx={{ fontWeight: 800, lineHeight: 1.15 }}
-              >
-                Planner
-              </Typography>
-
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                {selectedDateLabel} • Plan your tasks for the day
-              </Typography>
-            </Box>
-
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleOpenAddModal}
-              sx={{ borderRadius: 2 }}
-            >
-              Add Task
-            </Button>
-          </Stack>
-        </Paper>
-
-        {/* Main layout */}
-        <Grid container spacing={2} alignItems="stretch">
-          <Grid item xs={12} md={8}>
+          <Box sx={{ flex: "1 1 auto", minWidth: 0 }}>
             <TaskBoard onEdit={handleEditTask} selectedDate={selectedDate} />
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} md={4}>
+          <Box
+            sx={{
+              width: UI.layout.rightPanelWidth,
+              height: UI.layout.rightPanelHeight,
+              flex: `0 0 ${UI.layout.rightPanelWidth}px`,
+              overflow: "auto",
+            }}
+          >
             <ContextPanel
               onOpenModal={handleOpenAddModal}
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
             />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
-        {/* Add/Edit modal */}
         <AddTaskModal
           open={openModal}
           onClose={handleCloseModal}
