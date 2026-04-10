@@ -75,8 +75,23 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+<<<<<<< HEAD
     </dependencies>
 
+=======
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+    </dependencies>
+
+
+
+>>>>>>> 7114386843f3923f6d6062fec78eab55fddcd2f6
 	<build>
         <plugins>
             <!-- Compiler plugin with Lombok annotation processing -->

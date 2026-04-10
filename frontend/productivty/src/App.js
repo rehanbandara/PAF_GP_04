@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import logo from './logo.svg';
 import './App.css';
 
@@ -19,6 +20,27 @@ function App() {
         </a>
       </header>
     </div>
+=======
+import React from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+
+import Dashboard from "./pages/planner-rehan/Dashboard";
+
+
+function App() {
+  return (
+    <Routes>
+      {/* Redirect root to planner */}
+      <Route path="/" element={<Navigate to="/planner" replace />} />
+
+      {/* Pages */}
+      <Route path="/planner" element={<Dashboard />} />
+      
+
+      {/* fallback */}
+      <Route path="*" element={<Navigate to="/planner" replace />} />
+    </Routes>
+>>>>>>> 7114386843f3923f6d6062fec78eab55fddcd2f6
   );
 }
 

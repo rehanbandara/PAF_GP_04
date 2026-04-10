@@ -6,8 +6,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Application {
 
+<<<<<<< HEAD
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
+=======
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+>>>>>>> 7114386843f3923f6d6062fec78eab55fddcd2f6
 
 }
