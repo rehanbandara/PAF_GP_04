@@ -78,6 +78,19 @@ public class TimerSessionService {
         TimerSession session = timerSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new RuntimeException("Session not found with id: " + sessionId));
         
+        // Calculate duration if not set
+        if (session.getDuration() == null) {
+            if (session.getStartTime() != null && session.getCompletedAt() != null) {
+                long durationMinutes = java.time.Duration.between(session.getStartTime(), session.getCompletedAt()).toMinutes();
+                session.setDuration((int) durationMinutes);
+            } else if (session.getTimeLeft() != null) {
+                // Use timeLeft to calculate duration (for sessions that were started but never had proper duration set)
+                session.setDuration(session.getTimeLeft() / 60); // Convert seconds back to minutes
+            } else {
+                session.setDuration(0); // Default to 0 if we can't calculate
+            }
+        }
+        
         session.setStatus(TimerSession.SessionStatus.COMPLETED);
         session.setIsRunning(false);
         session.setCompletedAt(LocalDateTime.now());
