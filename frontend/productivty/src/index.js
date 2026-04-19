@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
@@ -15,3 +16,40 @@ root.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+=======
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
+import { ThemeController } from "./theme/ThemeController";
+
+/**
+ * React Query basics:
+ * - QueryClient stores the cache for fetched server data (tasks)
+ * - QueryClientProvider makes it available to your whole app
+ */
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false,
+            retry: 1,
+        },
+    },
+});
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+    <React.StrictMode>
+        <QueryClientProvider client={queryClient}>
+            <ThemeController>
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
+            </ThemeController>
+        </QueryClientProvider>
+    </React.StrictMode>
+);
+>>>>>>> 7114386843f3923f6d6062fec78eab55fddcd2f6
