@@ -58,7 +58,7 @@ const Home = () => {
               mb: 2
             }}
           >
-            Productivity Dashboard
+            Productivity Hub
           </Typography>
           <Typography
             variant="h5"
@@ -69,7 +69,7 @@ const Home = () => {
               mx: 'auto'
             }}
           >
-            Transform your productivity with smart focus management, goal tracking, and wellness features designed for modern professionals.
+            Transform your productivity Hub designed for modern professionals.
           </Typography>
           
           {/* Action Buttons */}

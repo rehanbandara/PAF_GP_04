@@ -41,7 +41,7 @@ const Goals = () => {
   const [newGoal, setNewGoal] = useState({
     title: '',
     description: '',
-    priority: 'medium',
+    priority: 'MEDIUM',
     dueDate: '',
     category: 'Personal'
   });
@@ -114,7 +114,7 @@ const Goals = () => {
         
         const createdGoal = await goalsService.createGoal(goalData);
         setGoals([...goals, createdGoal]);
-        setNewGoal({ title: '', description: '', priority: 'medium', dueDate: '', category: 'Personal' });
+        setNewGoal({ title: '', description: '', priority: 'MEDIUM', dueDate: '', category: 'Personal' });
         setOpenDialog(false);
       } catch (err) {
         setError(err.message);
@@ -246,12 +246,9 @@ const Goals = () => {
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'HIGH':
-      case 'high': return 'error';
-      case 'MEDIUM':
-      case 'medium': return 'warning';
-      case 'LOW':
-      case 'low': return 'info';
+      case 'HIGH': return 'error';
+      case 'MEDIUM': return 'warning';
+      case 'LOW': return 'info';
       default: return 'default';
     }
   };
@@ -268,7 +265,7 @@ const Goals = () => {
             startIcon={<AddIcon />}
             onClick={() => {
               setEditingGoal(null);
-              setNewGoal({ title: '', description: '', priority: 'medium', dueDate: '', category: 'Personal' });
+              setNewGoal({ title: '', description: '', priority: 'MEDIUM', dueDate: '', category: 'Personal' });
               setOpenDialog(true);
             }}
           >
@@ -563,9 +560,9 @@ const Goals = () => {
                   onChange={(e) => setNewGoal({ ...newGoal, priority: e.target.value })}
                   error={!newGoal.priority}
                 >
-                  <MenuItem value="high">High Priority</MenuItem>
-                  <MenuItem value="medium">Medium Priority</MenuItem>
-                  <MenuItem value="low">Low Priority</MenuItem>
+                  <MenuItem value="HIGH">High Priority</MenuItem>
+                  <MenuItem value="MEDIUM">Medium Priority</MenuItem>
+                  <MenuItem value="LOW">Low Priority</MenuItem>
                 </Select>
                 {!newGoal.priority && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 2 }}>

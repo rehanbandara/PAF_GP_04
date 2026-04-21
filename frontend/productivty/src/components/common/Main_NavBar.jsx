@@ -33,7 +33,7 @@ function Main_NavBar({ brand = "Productivity", rightSlot = null }) {
     const links = [
         { label: "Task Management", to: "/planner" },
         { label: "NotePad", to: "/notepad" }, // (route not created yet; you can add later)
-        { label: "Focus&Wellness", to: "/f" },
+        { label: "Focus&Wellness", to: "/dashboard" },
         { label: "Files", to: "/files" },
         { label: "Settings", to: "/settings" },
     ];
