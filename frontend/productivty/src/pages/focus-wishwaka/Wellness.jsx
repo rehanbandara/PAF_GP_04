@@ -40,6 +40,20 @@ import {
   Close as CloseIcon
 } from '@mui/icons-material';
 
+// Utility function to generate unique session ID
+const getOrCreateSessionId = () => {
+  let sessionId = localStorage.getItem('userSessionId');
+  if (!sessionId) {
+    // Generate a unique ID using timestamp and random number
+    sessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('userSessionId', sessionId);
+    console.log('DEBUG: Wellness - Generated new session ID:', sessionId);
+  } else {
+    console.log('DEBUG: Wellness - Using existing session ID:', sessionId);
+  }
+  return sessionId;
+};
+
 const Wellness = () => {
   // Reminder Engine State
   const [reminders, setReminders] = useState({
@@ -78,7 +92,14 @@ const Wellness = () => {
   useEffect(() => {
     const loadRemindersFromBackend = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/wellness/reminders');
+        const sessionId = getOrCreateSessionId();
+        console.log('DEBUG: Wellness GET - Sending session ID:', sessionId);
+        const response = await fetch('http://localhost:8080/api/wellness/reminders', {
+          headers: {
+            'X-Session-ID': sessionId,
+            'Content-Type': 'application/json'
+          }
+        });
         if (response.ok) {
           const backendReminders = await response.json();
           
@@ -276,8 +297,15 @@ const Wellness = () => {
 
   const handleSettingsSave = async () => {
     try {
+      const sessionId = getOrCreateSessionId();
+      
       // First get current reminders to get their actual IDs
-      const getResponse = await fetch('http://localhost:8080/api/wellness/reminders');
+      const getResponse = await fetch('http://localhost:8080/api/wellness/reminders', {
+        headers: {
+          'X-Session-ID': sessionId,
+          'Content-Type': 'application/json'
+        }
+      });
       if (!getResponse.ok) {
         throw new Error('Failed to get current reminders');
       }
@@ -316,6 +344,7 @@ const Wellness = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'X-Session-ID': sessionId,
         },
         body: JSON.stringify(remindersData),
       });

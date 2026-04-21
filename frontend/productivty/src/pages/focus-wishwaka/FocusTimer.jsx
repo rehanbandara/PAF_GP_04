@@ -33,6 +33,20 @@ import {
 } from '@mui/icons-material';
 import { timerService } from '../../services/timerService';
 
+// Utility function to generate unique session ID
+const getOrCreateSessionId = () => {
+  let sessionId = localStorage.getItem('userSessionId');
+  if (!sessionId) {
+    // Generate a unique ID using timestamp and random number
+    sessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('userSessionId', sessionId);
+    console.log('DEBUG: FocusTimer - Generated new session ID:', sessionId);
+  } else {
+    console.log('DEBUG: FocusTimer - Using existing session ID:', sessionId);
+  }
+  return sessionId;
+};
+
 const FocusTimer = () => {
   const [workDuration, setWorkDuration] = useState(25);
   const [breakDuration, setBreakDuration] = useState(5);
@@ -62,7 +76,15 @@ const FocusTimer = () => {
     const loadSettings = async () => {
       // First, try to load from backend (highest priority since it's now working)
       try {
-        const response = await fetch('http://localhost:8080/api/settings/timer');
+        const sessionId = getOrCreateSessionId();
+        console.log('DEBUG: FocusTimer GET - Sending session ID:', sessionId);
+        const response = await fetch('http://localhost:8080/api/settings/timer', {
+          headers: {
+            'X-Session-ID': sessionId,
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log('DEBUG: FocusTimer GET - Received response:', response);
         if (response.ok) {
           const backendSettings = await response.json();
           console.log('DEBUG: Loaded settings from backend:', backendSettings);
@@ -326,10 +348,13 @@ const FocusTimer = () => {
         }
       };
 
+      const sessionId = getOrCreateSessionId();
+      console.log('DEBUG: FocusTimer PUT - Sending session ID:', sessionId);
       const response = await fetch('http://localhost:8080/api/settings/timer', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'X-Session-ID': sessionId,
         },
         body: JSON.stringify(settingsData),
       });

@@ -53,12 +53,25 @@ public class UserSettingsService {
     
     // Methods for handling anonymous/unauthenticated users
     public UserSettingsDTO getAnonymousSettings(String sessionId) {
-        return anonymousSettings.getOrDefault(sessionId, createDefaultAnonymousSettings());
+        System.out.println("DEBUG: UserSettingsService GET - Current anonymous storage keys: " + anonymousSettings.keySet());
+        System.out.println("DEBUG: UserSettingsService GET - Requested sessionId: " + sessionId);
+        UserSettingsDTO result = anonymousSettings.getOrDefault(sessionId, createDefaultAnonymousSettings());
+        System.out.println("DEBUG: UserSettingsService GET - Retrieved settings for sessionId: " + sessionId + " -> " + (result != null ? "found" : "default"));
+        return result;
     }
     
     public UserSettingsDTO updateAnonymousSettings(String sessionId, UserSettingsDTO settingsDTO) {
+        System.out.println("DEBUG: UserSettingsService PUT - Storing settings for sessionId: " + sessionId);
         anonymousSettings.put(sessionId, settingsDTO);
+        System.out.println("DEBUG: UserSettingsService PUT - Current anonymous storage keys: " + anonymousSettings.keySet());
         return settingsDTO;
+    }
+    
+    // Helper method to generate user-specific session ID
+    public String generateUserSessionId(String userAgent, String ip) {
+        // Create a simple hash from user agent and IP to identify unique users
+        String combined = userAgent + "::" + ip;
+        return "user-" + combined.hashCode();
     }
     
     private UserSettingsDTO createDefaultAnonymousSettings() {

@@ -1,16 +1,17 @@
 package com.productivity.backend.controller.focus_wishwaka_controller;
 
 import com.productivity.backend.DTO.focus_wishwaka_DTO.UserSettingsDTO;
-import com.productivity.backend.entity.user_entity.User;
 import com.productivity.backend.entity.focus_wishwaka_entity.UserSettings;
+import com.productivity.backend.entity.user_entity.User;
 import com.productivity.backend.service.focus_wishwaka_service.UserSettingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/api/settings")
@@ -51,11 +52,21 @@ public class SettingsController {
     }
     
     @GetMapping("/timer")
-    public ResponseEntity<UserSettingsDTO> getTimerSettings(Authentication authentication) {
+    public ResponseEntity<UserSettingsDTO> getTimerSettings(Authentication authentication, HttpServletRequest request) {
         if (authentication == null || authentication.getPrincipal() == null) {
-            // Return settings for anonymous users using session ID
-            String sessionId = "anonymous-timer"; // Fixed session ID for timer settings
+            // Use client-generated session ID from header
+            String sessionId = request.getHeader("X-Session-ID");
+            System.out.println("DEBUG: SettingsController GET - Received sessionId: " + sessionId);
+            if (sessionId == null || sessionId.trim().isEmpty()) {
+                // Fallback to generated session ID if header is missing
+                String userAgent = request.getHeader("User-Agent");
+                String clientIp = getClientIpAddress(request);
+                sessionId = userSettingsService.generateUserSessionId(userAgent, clientIp);
+                System.out.println("DEBUG: SettingsController GET - Generated fallback sessionId: " + sessionId);
+            }
+            
             UserSettingsDTO settings = userSettingsService.getAnonymousSettings(sessionId);
+            System.out.println("DEBUG: SettingsController GET - Retrieved settings for sessionId: " + sessionId);
             return ResponseEntity.ok(settings);
         }
         User user = (User) authentication.getPrincipal();
@@ -64,11 +75,21 @@ public class SettingsController {
     }
     
     @PutMapping("/timer")
-    public ResponseEntity<UserSettingsDTO> updateTimerSettings(@Valid @RequestBody UserSettingsDTO settingsDTO, Authentication authentication) {
+    public ResponseEntity<UserSettingsDTO> updateTimerSettings(@Valid @RequestBody UserSettingsDTO settingsDTO, Authentication authentication, HttpServletRequest request) {
         if (authentication == null || authentication.getPrincipal() == null) {
-            // Store settings for anonymous users using session ID
-            String sessionId = "anonymous-timer"; // Fixed session ID for timer settings
+            // Use client-generated session ID from header
+            String sessionId = request.getHeader("X-Session-ID");
+            System.out.println("DEBUG: SettingsController PUT - Received sessionId: " + sessionId);
+            if (sessionId == null || sessionId.trim().isEmpty()) {
+                // Fallback to generated session ID if header is missing
+                String userAgent = request.getHeader("User-Agent");
+                String clientIp = getClientIpAddress(request);
+                sessionId = userSettingsService.generateUserSessionId(userAgent, clientIp);
+                System.out.println("DEBUG: SettingsController PUT - Generated fallback sessionId: " + sessionId);
+            }
+            
             UserSettingsDTO updatedSettings = userSettingsService.updateAnonymousSettings(sessionId, settingsDTO);
+            System.out.println("DEBUG: SettingsController PUT - Updated settings for sessionId: " + sessionId);
             return ResponseEntity.ok(updatedSettings);
         }
         // Only update focus settings (timer settings)
@@ -81,6 +102,20 @@ public class SettingsController {
         
         UserSettingsDTO updatedSettings = userSettingsService.updateSettings(currentSettings, user);
         return ResponseEntity.ok(updatedSettings);
+    }
+    
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty() && !"unknown".equalsIgnoreCase(xRealIp)) {
+            return xRealIp;
+        }
+        
+        return request.getRemoteAddr();
     }
     
     private UserSettingsDTO createDefaultTimerSettings() {

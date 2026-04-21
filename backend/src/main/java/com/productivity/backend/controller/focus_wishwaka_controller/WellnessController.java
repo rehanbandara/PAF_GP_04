@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -25,10 +25,17 @@ public class WellnessController {
     private final WellnessService wellnessService;
     
     @GetMapping("/reminders")
-    public ResponseEntity<Map<String, WellnessReminderDTO>> getReminders(Authentication authentication) {
+    public ResponseEntity<Map<String, WellnessReminderDTO>> getReminders(Authentication authentication, HttpServletRequest request) {
         if (authentication == null || authentication.getPrincipal() == null) {
-            // Return reminders for anonymous users using session ID
-            String sessionId = "anonymous-wellness"; // Fixed session ID for wellness settings
+            // Use client-generated session ID from header
+            String sessionId = request.getHeader("X-Session-ID");
+            if (sessionId == null || sessionId.trim().isEmpty()) {
+                // Fallback to generated session ID if header is missing
+                String userAgent = request.getHeader("User-Agent");
+                String clientIp = getClientIpAddress(request);
+                sessionId = wellnessService.generateUserSessionId(userAgent, clientIp);
+            }
+            
             Map<String, WellnessReminderDTO> reminders = wellnessService.getAnonymousReminders(sessionId);
             return ResponseEntity.ok(reminders);
         }
@@ -38,16 +45,37 @@ public class WellnessController {
     }
     
     @PutMapping("/reminders")
-    public ResponseEntity<Map<String, WellnessReminderDTO>> updateReminders(@Valid @RequestBody Map<String, WellnessReminderDTO> reminders, Authentication authentication) {
+    public ResponseEntity<Map<String, WellnessReminderDTO>> updateReminders(@Valid @RequestBody Map<String, WellnessReminderDTO> reminders, Authentication authentication, HttpServletRequest request) {
         if (authentication == null || authentication.getPrincipal() == null) {
-            // Store reminders for anonymous users using session ID
-            String sessionId = "anonymous-wellness"; // Fixed session ID for wellness settings
+            // Use client-generated session ID from header
+            String sessionId = request.getHeader("X-Session-ID");
+            if (sessionId == null || sessionId.trim().isEmpty()) {
+                // Fallback to generated session ID if header is missing
+                String userAgent = request.getHeader("User-Agent");
+                String clientIp = getClientIpAddress(request);
+                sessionId = wellnessService.generateUserSessionId(userAgent, clientIp);
+            }
+            
             Map<String, WellnessReminderDTO> updatedReminders = wellnessService.updateAnonymousReminders(sessionId, reminders);
             return ResponseEntity.ok(updatedReminders);
         }
         User user = (User) authentication.getPrincipal();
         Map<String, WellnessReminderDTO> updatedReminders = wellnessService.updateReminders(reminders, user);
         return ResponseEntity.ok(updatedReminders);
+    }
+    
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty() && !"unknown".equalsIgnoreCase(xRealIp)) {
+            return xRealIp;
+        }
+        
+        return request.getRemoteAddr();
     }
     
     private Map<String, WellnessReminderDTO> createDefaultReminders() {

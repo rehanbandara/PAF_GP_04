@@ -196,6 +196,13 @@ public class WellnessService {
         return reminders;
     }
     
+    // Helper method to generate user-specific session ID
+    public String generateUserSessionId(String userAgent, String ip) {
+        // Create a simple hash from user agent and IP to identify unique users
+        String combined = userAgent + "::" + ip;
+        return "wellness-user-" + combined.hashCode();
+    }
+    
     private Map<String, WellnessReminderDTO> createDefaultAnonymousReminders() {
         Map<String, WellnessReminderDTO> defaultReminders = new HashMap<>();
         
