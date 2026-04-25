@@ -139,6 +139,14 @@ export default function AdminResources() {
     return matchSearch && matchType && matchStatus
   })
 
+  const matchSearch =
+  !search ||
+  [r.name, r.resourceCode, r.location, r.type, r.status]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+    .includes(search.toLowerCase())
+
   const inputBase =
     'w-full rounded-xl px-4 py-3 text-sm outline-none transition ' +
     'bg-white/10 text-white placeholder:text-white/40 ' +
