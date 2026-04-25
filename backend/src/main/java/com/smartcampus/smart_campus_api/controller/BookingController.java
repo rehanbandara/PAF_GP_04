@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class BookingController {
-
+    // Controller for managing bookings of campus resources (e.g., rooms, equipment)
     private final BookingService bookingService;
     private final UserRepository userRepository;
 
