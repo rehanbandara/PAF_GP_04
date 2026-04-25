@@ -53,7 +53,9 @@ export default function AdminDashboard() {
     }
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => { 
+    fetchData() 
+  }, [])
 
   const STAT_CARDS = [
     { label: 'Total users', icon: Users, value: userCount, path: '/admin/users' },
@@ -159,6 +161,7 @@ export default function AdminDashboard() {
                       <p className="mt-1 text-xs text-white/60">
                         {b.userName} • {b.bookingDate}
                       </p>
+                      <p>{b?.resourceName}</p>
                     </div>
                     <span className="rounded-full border border-amber-300/20 bg-amber-400/15 px-2.5 py-1 text-[11px] font-semibold text-amber-100">
                       Pending
