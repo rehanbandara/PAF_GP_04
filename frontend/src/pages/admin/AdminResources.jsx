@@ -87,6 +87,9 @@ export default function AdminResources() {
       await deleteResource(id)
       toast.success('Resource deleted')
       fetchResources()
+      setLoading(true)
+    await deleteResource(id)
+    await fetchResources()
     } catch {
       toast.error('Failed to delete resource')
     }
