@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
 
-
+// booking model
 @Entity
 @Table(name = "bookings")
 @Data              
