@@ -1,4 +1,4 @@
-# 📌 Task Management Subsystem - Productivity Web App
+# 📌  Productivity Web App
 
 ## Overview
 The **Task Management Subsystem** is part of the Student Productivity Web Application.  
